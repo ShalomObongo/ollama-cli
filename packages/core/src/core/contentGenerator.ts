@@ -48,6 +48,8 @@ export enum AuthType {
   USE_GEMINI = 'gemini-api-key',
   USE_VERTEX_AI = 'vertex-ai',
   CLOUD_SHELL = 'cloud-shell',
+  USE_OLLAMA = 'ollama',
+  USE_OLLAMA_API_KEY = 'ollama-api-key',
 }
 
 export type ContentGeneratorConfig = {
@@ -66,6 +68,7 @@ export function createContentGeneratorConfig(
   const googleApiKey = process.env['GOOGLE_API_KEY'] || undefined;
   const googleCloudProject = process.env['GOOGLE_CLOUD_PROJECT'] || undefined;
   const googleCloudLocation = process.env['GOOGLE_CLOUD_LOCATION'] || undefined;
+  const ollamaApiKey = process.env['OLLAMA_API_KEY'] || undefined;
 
   // Use runtime model from config if available; otherwise, fall back to parameter or default
   const effectiveModel = config.getModel() || DEFAULT_GEMINI_MODEL;
@@ -82,6 +85,17 @@ export function createContentGeneratorConfig(
     authType === AuthType.LOGIN_WITH_GOOGLE_GCA ||
     authType === AuthType.CLOUD_SHELL
   ) {
+    return contentGeneratorConfig;
+  }
+
+  // Ollama authentication (local or API key)
+  if (authType === AuthType.USE_OLLAMA) {
+    // Local Ollama doesn't require API key
+    return contentGeneratorConfig;
+  }
+
+  if (authType === AuthType.USE_OLLAMA_API_KEY && ollamaApiKey) {
+    contentGeneratorConfig.apiKey = ollamaApiKey;
     return contentGeneratorConfig;
   }
 
@@ -111,10 +125,22 @@ export async function createContentGenerator(
   sessionId?: string,
 ): Promise<ContentGenerator> {
   const version = process.env['CLI_VERSION'] || process.version;
-  const userAgent = `GeminiCLI/${version} (${process.platform}; ${process.arch})`;
+  const userAgent = `OllamaCLI/${version} (${process.platform}; ${process.arch})`;
   const baseHeaders: Record<string, string> = {
     'User-Agent': userAgent,
   };
+
+  // Check for Ollama authentication types first
+  if (
+    config.authType === AuthType.USE_OLLAMA ||
+    config.authType === AuthType.USE_OLLAMA_API_KEY
+  ) {
+    const { createOllamaContentGenerator } = await import('./ollamaContentGenerator.js');
+    return new LoggingContentGenerator(
+      createOllamaContentGenerator(gcConfig),
+      gcConfig,
+    );
+  }
 
   if (
     config.authType === AuthType.LOGIN_WITH_GOOGLE ||
