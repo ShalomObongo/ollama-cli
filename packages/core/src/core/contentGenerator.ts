@@ -20,6 +20,7 @@ import { Config } from '../config/config.js';
 import { UserTierId } from '../code_assist/types.js';
 import { LoggingContentGenerator } from './loggingContentGenerator.js';
 import { InstallationManager } from '../utils/installationManager.js';
+import { OllamaContentGenerator } from './ollamaContentGenerator.js';
 
 /**
  * Interface abstracting the core functionalities for generating content and counting tokens.
@@ -135,22 +136,18 @@ export async function createContentGenerator(
     config.authType === AuthType.USE_OLLAMA ||
     config.authType === AuthType.USE_OLLAMA_API_KEY
   ) {
-    // For now, return a mock content generator that throws helpful errors
-    const mockGenerator: ContentGenerator = {
-      async generateContent(request: GenerateContentParameters, userPromptId: string) {
-        throw new Error('Ollama integration is not fully implemented yet. Please use Gemini authentication for now.');
-      },
-      async generateContentStream(request: GenerateContentParameters, userPromptId: string) {
-        throw new Error('Ollama integration is not fully implemented yet. Please use Gemini authentication for now.');
-      },
-      async countTokens(request: CountTokensParameters) {
-        throw new Error('Ollama integration is not fully implemented yet. Please use Gemini authentication for now.');
-      },
-      async embedContent(request: EmbedContentParameters) {
-        throw new Error('Ollama integration is not fully implemented yet. Please use Gemini authentication for now.');
-      },
+    // Create real Ollama client
+    const baseUrl = process.env['OLLAMA_BASE_URL'] || 'http://localhost:11434';
+    const apiKey = config.apiKey;
+
+    const ollamaConfig = {
+      baseUrl,
+      model: config.model,
+      apiKey,
     };
-    return new LoggingContentGenerator(mockGenerator, gcConfig);
+
+    const ollamaGenerator = new OllamaContentGenerator(ollamaConfig);
+    return new LoggingContentGenerator(ollamaGenerator, gcConfig);
   }
 
   if (
