@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AuthType } from '@google/gemini-cli-core';
+import { AuthType } from 'ollama-cli-core';
 import { loadEnvironment } from './settings.js';
 
 export const validateAuthMethod = (authMethod: string): string | null => {
@@ -24,6 +24,18 @@ export const validateAuthMethod = (authMethod: string): string | null => {
         '  export GOOGLE_CLOUD_PROJECT=<your-project-id>\n' +
         'and try again.'
       );
+    }
+    return null;
+  }
+
+  if (authMethod === AuthType.USE_OLLAMA) {
+    // No validation needed for local Ollama
+    return null;
+  }
+
+  if (authMethod === AuthType.USE_OLLAMA_API_KEY) {
+    if (!process.env['OLLAMA_API_KEY']) {
+      return 'OLLAMA_API_KEY environment variable not found. Add that to your environment and try again (no reload needed if using .env)!';
     }
     return null;
   }

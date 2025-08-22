@@ -9,7 +9,7 @@ import { Box, Text } from 'ink';
 import { Colors } from '../colors.js';
 import { RadioButtonSelect } from './shared/RadioButtonSelect.js';
 import { LoadedSettings, SettingScope } from '../../config/settings.js';
-import { AuthType } from '@google/gemini-cli-core';
+import { AuthType } from 'ollama-cli-core';
 import { validateAuthMethod } from '../../config/auth.js';
 import { useKeypress } from '../hooks/useKeypress.js';
 
@@ -42,14 +42,21 @@ export function AuthDialog({
     }
 
     const defaultAuthType = parseDefaultAuthType(
-      process.env['GEMINI_DEFAULT_AUTH_TYPE'],
+      process.env['OLLAMA_DEFAULT_AUTH_TYPE'],
     );
 
-    if (process.env['GEMINI_DEFAULT_AUTH_TYPE'] && defaultAuthType === null) {
+    if (process.env['OLLAMA_DEFAULT_AUTH_TYPE'] && defaultAuthType === null) {
       return (
-        `Invalid value for GEMINI_DEFAULT_AUTH_TYPE: "${process.env['GEMINI_DEFAULT_AUTH_TYPE']}". ` +
+        `Invalid value for OLLAMA_DEFAULT_AUTH_TYPE: "${process.env['OLLAMA_DEFAULT_AUTH_TYPE']}". ` +
         `Valid values are: ${Object.values(AuthType).join(', ')}.`
       );
+    }
+
+    if (
+      process.env['OLLAMA_API_KEY'] &&
+      (!defaultAuthType || defaultAuthType === AuthType.USE_OLLAMA_API_KEY)
+    ) {
+      return 'Existing API key detected (OLLAMA_API_KEY). Select "Ollama API Key" option to use it.';
     }
 
     if (
@@ -61,6 +68,14 @@ export function AuthDialog({
     return null;
   });
   const items = [
+    {
+      label: 'Use Ollama (Local)',
+      value: AuthType.USE_OLLAMA,
+    },
+    {
+      label: 'Use Ollama API Key',
+      value: AuthType.USE_OLLAMA_API_KEY,
+    },
     {
       label: 'Login with Google - Free Tier',
       value: AuthType.LOGIN_WITH_GOOGLE,

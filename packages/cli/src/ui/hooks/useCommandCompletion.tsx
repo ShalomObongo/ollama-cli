@@ -20,7 +20,7 @@ import {
   PromptCompletion,
   PROMPT_COMPLETION_MIN_LENGTH,
 } from './usePromptCompletion.js';
-import { Config } from '@google/gemini-cli-core';
+import { Config } from 'ollama-cli-core';
 import { useCompletion } from './useCompletion.js';
 
 export enum CompletionMode {

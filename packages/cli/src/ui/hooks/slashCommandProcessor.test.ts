@@ -8,9 +8,8 @@ const { logSlashCommand } = vi.hoisted(() => ({
   logSlashCommand: vi.fn(),
 }));
 
-vi.mock('@google/gemini-cli-core', async (importOriginal) => {
-  const original =
-    await importOriginal<typeof import('@google/gemini-cli-core')>();
+vi.mock('ollama-cli-core', async (importOriginal) => {
+  const original = await importOriginal<typeof import('ollama-cli-core')>();
 
   return {
     ...original,
@@ -76,16 +75,13 @@ import {
   ConfirmShellCommandsActionReturn,
   SlashCommand,
 } from '../commands/types.js';
-import { ToolConfirmationOutcome } from '@google/gemini-cli-core';
+import { ToolConfirmationOutcome } from 'ollama-cli-core';
 import { LoadedSettings } from '../../config/settings.js';
 import { MessageType } from '../types.js';
 import { BuiltinCommandLoader } from '../../services/BuiltinCommandLoader.js';
 import { FileCommandLoader } from '../../services/FileCommandLoader.js';
 import { McpPromptLoader } from '../../services/McpPromptLoader.js';
-import {
-  SlashCommandStatus,
-  makeFakeConfig,
-} from '@google/gemini-cli-core/index.js';
+import { SlashCommandStatus, makeFakeConfig } from 'ollama-cli-core/index.js';
 
 function createTestCommand(
   overrides: Partial<SlashCommand>,

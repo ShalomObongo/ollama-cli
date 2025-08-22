@@ -629,6 +629,14 @@ export class Config {
     return this.proxy;
   }
 
+  getOllamaBaseUrl(): string {
+    return process.env['OLLAMA_BASE_URL'] || 'http://localhost:11434';
+  }
+
+  getOllamaApiKey(): string | undefined {
+    return process.env['OLLAMA_API_KEY'];
+  }
+
   getWorkingDir(): string {
     return this.cwd;
   }

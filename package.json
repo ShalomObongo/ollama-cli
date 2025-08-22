@@ -1,5 +1,5 @@
 {
-  "name": "@google/gemini-cli",
+  "name": "ollama-cli",
   "version": "0.1.21",
   "engines": {
     "node": ">=20.0.0"
@@ -11,7 +11,7 @@
   "private": "true",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/google-gemini/gemini-cli.git"
+    "url": "git+https://github.com/ShalomObongo/ollama-cli.git"
   },
   "config": {
     "sandboxImageUri": "us-docker.pkg.dev/gemini-code-dev/gemini-cli/sandbox:0.1.21"
@@ -35,9 +35,9 @@
     "test:scripts": "vitest run --config ./scripts/tests/vitest.config.ts",
     "test:e2e": "cross-env VERBOSE=true KEEP_OUTPUT=true npm run test:integration:sandbox:none",
     "test:integration:all": "npm run test:integration:sandbox:none && npm run test:integration:sandbox:docker && npm run test:integration:sandbox:podman",
-    "test:integration:sandbox:none": "GEMINI_SANDBOX=false vitest run --root ./integration-tests",
-    "test:integration:sandbox:docker": "npm run build:sandbox && GEMINI_SANDBOX=docker vitest run --root ./integration-tests",
-    "test:integration:sandbox:podman": "GEMINI_SANDBOX=podman vitest run --root ./integration-tests",
+    "test:integration:sandbox:none": "OLLAMA_SANDBOX=false vitest run --root ./integration-tests",
+    "test:integration:sandbox:docker": "npm run build:sandbox && OLLAMA_SANDBOX=docker vitest run --root ./integration-tests",
+    "test:integration:sandbox:podman": "OLLAMA_SANDBOX=podman vitest run --root ./integration-tests",
     "lint": "eslint . --ext .ts,.tsx && eslint integration-tests",
     "lint:fix": "eslint . --fix && eslint integration-tests --fix",
     "lint:ci": "eslint . --ext .ts,.tsx --max-warnings 0 && eslint integration-tests --max-warnings 0",
@@ -51,7 +51,7 @@
     "clean": "node scripts/clean.js"
   },
   "bin": {
-    "gemini": "bundle/gemini.js"
+    "ollama-cli": "bundle/ollama-cli.js"
   },
   "files": [
     "bundle/",

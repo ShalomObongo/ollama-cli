@@ -12,16 +12,15 @@ import {
   shutdownTelemetry,
   GeminiEventType,
   ServerGeminiStreamEvent,
-} from '@google/gemini-cli-core';
+} from 'ollama-cli-core';
 import { Part } from '@google/genai';
 import { runNonInteractive } from './nonInteractiveCli.js';
 import { vi } from 'vitest';
 
 // Mock core modules
 vi.mock('./ui/hooks/atCommandProcessor.js');
-vi.mock('@google/gemini-cli-core', async (importOriginal) => {
-  const original =
-    await importOriginal<typeof import('@google/gemini-cli-core')>();
+vi.mock('ollama-cli-core', async (importOriginal) => {
+  const original = await importOriginal<typeof import('ollama-cli-core')>();
   return {
     ...original,
     executeToolCall: vi.fn(),

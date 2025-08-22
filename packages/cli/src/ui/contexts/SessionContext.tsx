@@ -18,7 +18,7 @@ import {
   SessionMetrics,
   ModelMetrics,
   sessionId,
-} from '@google/gemini-cli-core';
+} from 'ollama-cli-core';
 
 // --- Interface Definitions ---
 

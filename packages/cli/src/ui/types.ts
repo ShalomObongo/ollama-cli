@@ -8,7 +8,7 @@ import {
   ToolCallConfirmationDetails,
   ToolResultDisplay,
   UserTierId,
-} from '@google/gemini-cli-core';
+} from 'ollama-cli-core';
 
 // Only defining the state enum needed by the UI
 export enum StreamingState {

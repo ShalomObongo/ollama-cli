@@ -4,11 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  Config,
-  getErrorMessage,
-  getMCPServerPrompts,
-} from '@google/gemini-cli-core';
+import { Config, getErrorMessage, getMCPServerPrompts } from 'ollama-cli-core';
 import {
   CommandContext,
   CommandKind,

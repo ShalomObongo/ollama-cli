@@ -5,7 +5,7 @@
  */
 
 import * as path from 'node:path';
-import { Config, Storage } from '@google/gemini-cli-core';
+import { Config, Storage } from 'ollama-cli-core';
 import mock from 'mock-fs';
 import { FileCommandLoader } from './FileCommandLoader.js';
 import { assert, vi } from 'vitest';
@@ -48,9 +48,8 @@ vi.mock('./prompt-processors/argumentProcessor.js', async (importOriginal) => {
       .mockImplementation(() => new original.DefaultArgumentProcessor()),
   };
 });
-vi.mock('@google/gemini-cli-core', async (importOriginal) => {
-  const original =
-    await importOriginal<typeof import('@google/gemini-cli-core')>();
+vi.mock('ollama-cli-core', async (importOriginal) => {
+  const original = await importOriginal<typeof import('ollama-cli-core')>();
   return {
     ...original,
     Storage: original.Storage,

@@ -7,7 +7,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { isNodeError, Storage } from '@google/gemini-cli-core';
+import { isNodeError, Storage } from 'ollama-cli-core';
 
 const MAX_HISTORY_LENGTH = 100;
 

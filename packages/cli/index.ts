@@ -6,8 +6,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './src/gemini.js';
-import { main } from './src/gemini.js';
+import './src/ollama-cli.js';
+import { main } from './src/ollama-cli.js';
 
 // --- Global Entry Point ---
 main().catch((error) => {

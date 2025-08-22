@@ -20,6 +20,7 @@ import { Config } from '../config/config.js';
 import { UserTierId } from '../code_assist/types.js';
 import { LoggingContentGenerator } from './loggingContentGenerator.js';
 import { InstallationManager } from '../utils/installationManager.js';
+import { OllamaContentGenerator } from './ollamaContentGenerator.js';
 
 /**
  * Interface abstracting the core functionalities for generating content and counting tokens.
@@ -48,6 +49,8 @@ export enum AuthType {
   USE_GEMINI = 'gemini-api-key',
   USE_VERTEX_AI = 'vertex-ai',
   CLOUD_SHELL = 'cloud-shell',
+  USE_OLLAMA = 'ollama',
+  USE_OLLAMA_API_KEY = 'ollama-api-key',
 }
 
 export type ContentGeneratorConfig = {
@@ -66,6 +69,7 @@ export function createContentGeneratorConfig(
   const googleApiKey = process.env['GOOGLE_API_KEY'] || undefined;
   const googleCloudProject = process.env['GOOGLE_CLOUD_PROJECT'] || undefined;
   const googleCloudLocation = process.env['GOOGLE_CLOUD_LOCATION'] || undefined;
+  const ollamaApiKey = process.env['OLLAMA_API_KEY'] || undefined;
 
   // Use runtime model from config if available; otherwise, fall back to parameter or default
   const effectiveModel = config.getModel() || DEFAULT_GEMINI_MODEL;
@@ -82,6 +86,17 @@ export function createContentGeneratorConfig(
     authType === AuthType.LOGIN_WITH_GOOGLE_GCA ||
     authType === AuthType.CLOUD_SHELL
   ) {
+    return contentGeneratorConfig;
+  }
+
+  // Ollama authentication (local or API key)
+  if (authType === AuthType.USE_OLLAMA) {
+    // Local Ollama doesn't require API key
+    return contentGeneratorConfig;
+  }
+
+  if (authType === AuthType.USE_OLLAMA_API_KEY && ollamaApiKey) {
+    contentGeneratorConfig.apiKey = ollamaApiKey;
     return contentGeneratorConfig;
   }
 
@@ -111,10 +126,29 @@ export async function createContentGenerator(
   sessionId?: string,
 ): Promise<ContentGenerator> {
   const version = process.env['CLI_VERSION'] || process.version;
-  const userAgent = `GeminiCLI/${version} (${process.platform}; ${process.arch})`;
+  const userAgent = `OllamaCLI/${version} (${process.platform}; ${process.arch})`;
   const baseHeaders: Record<string, string> = {
     'User-Agent': userAgent,
   };
+
+  // Check for Ollama authentication types first
+  if (
+    config.authType === AuthType.USE_OLLAMA ||
+    config.authType === AuthType.USE_OLLAMA_API_KEY
+  ) {
+    // Create real Ollama client
+    const baseUrl = process.env['OLLAMA_BASE_URL'] || 'http://localhost:11434';
+    const apiKey = config.apiKey;
+
+    const ollamaConfig = {
+      baseUrl,
+      model: config.model,
+      apiKey,
+    };
+
+    const ollamaGenerator = new OllamaContentGenerator(ollamaConfig);
+    return new LoggingContentGenerator(ollamaGenerator, gcConfig);
+  }
 
   if (
     config.authType === AuthType.LOGIN_WITH_GOOGLE ||

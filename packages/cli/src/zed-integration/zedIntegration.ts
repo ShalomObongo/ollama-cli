@@ -22,7 +22,7 @@ import {
   getErrorStatus,
   MCPServerConfig,
   DiscoveredMCPTool,
-} from '@google/gemini-cli-core';
+} from 'ollama-cli-core';
 import * as acp from './acp.js';
 import { AcpFileSystemService } from './fileSystemService.js';
 import { Readable, Writable } from 'node:stream';
@@ -76,6 +76,17 @@ class GeminiAgent {
   ): Promise<acp.InitializeResponse> {
     this.clientCapabilities = args.clientCapabilities;
     const authMethods = [
+      {
+        id: AuthType.USE_OLLAMA,
+        name: 'Use Ollama (Local)',
+        description: 'Connect to local Ollama instance',
+      },
+      {
+        id: AuthType.USE_OLLAMA_API_KEY,
+        name: 'Use Ollama API key',
+        description:
+          'Requires setting the `OLLAMA_API_KEY` environment variable',
+      },
       {
         id: AuthType.LOGIN_WITH_GOOGLE,
         name: 'Log in with Google',

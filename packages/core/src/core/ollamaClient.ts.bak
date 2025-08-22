@@ -1,0 +1,402 @@
+/**
+ * @license
+ * Copyright 2025 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { Config } from '../config/config.js';
+import { retryWithBackoff } from '../utils/retry.js';
+import { getErrorMessage } from '../utils/errors.js';
+
+/**
+ * Ollama API response for chat completion
+ */
+export interface OllamaMessage {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  images?: string[];
+}
+
+export interface OllamaChatRequest {
+  model: string;
+  messages: OllamaMessage[];
+  stream?: boolean;
+  format?: string;
+  options?: Record<string, unknown>;
+}
+
+export interface OllamaChatResponse {
+  model: string;
+  created_at: string;
+  message: OllamaMessage;
+  done: boolean;
+  total_duration?: number;
+  load_duration?: number;
+  prompt_eval_count?: number;
+  prompt_eval_duration?: number;
+  eval_count?: number;
+  eval_duration?: number;
+}
+
+export interface OllamaModel {
+  name: string;
+  model: string;
+  modified_at: string;
+  size: number;
+  digest: string;
+  details: {
+    parent_model: string;
+    format: string;
+    family: string;
+    families?: string[];
+    parameter_size: string;
+    quantization_level: string;
+  };
+}
+
+export interface OllamaModelsResponse {
+  models: OllamaModel[];
+}
+
+export interface OllamaGenerateRequest {
+  model: string;
+  prompt: string;
+  stream?: boolean;
+  format?: string;
+  options?: Record<string, unknown>;
+  system?: string;
+  template?: string;
+  context?: number[];
+  raw?: boolean;
+}
+
+export interface OllamaGenerateResponse {
+  model: string;
+  created_at: string;
+  response: string;
+  done: boolean;
+  context?: number[];
+  total_duration?: number;
+  load_duration?: number;
+  prompt_eval_count?: number;
+  prompt_eval_duration?: number;
+  eval_count?: number;
+  eval_duration?: number;
+}
+
+/**
+ * Configuration for Ollama client
+ */
+export interface OllamaClientConfig {
+  baseUrl: string;
+  model: string;
+  apiKey?: string;
+  timeout?: number;
+}
+
+/**
+ * HTTP client for interacting with Ollama API
+ */
+export class OllamaClient {
+  private baseUrl: string;
+  private model: string;
+  private apiKey?: string;
+  private timeout: number;
+
+  constructor(config: OllamaClientConfig) {
+    this.baseUrl = config.baseUrl.replace(/\/$/, ''); // Remove trailing slash
+    this.model = config.model;
+    this.apiKey = config.apiKey;
+    this.timeout = config.timeout || 60000; // 60 seconds default
+  }
+
+  /**
+   * Create fetch headers for API requests
+   */
+  private createHeaders(): Record<string, string> {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    if (this.apiKey) {
+      headers['Authorization'] = `Bearer ${this.apiKey}`;
+    }
+
+    return headers;
+  }
+
+  /**
+   * Make HTTP request to Ollama API
+   */
+  private async request<T>(
+    endpoint: string,
+    options: RequestInit = {},
+  ): Promise<T> {
+    const url = `${this.baseUrl}/api${endpoint}`;
+    const headers = {
+      ...this.createHeaders(),
+      ...options.headers,
+    };
+
+    const response = await fetch(url, {
+      ...options,
+      headers,
+      signal: AbortSignal.timeout(this.timeout),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMessage;
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.error || errorJson.message || errorText;
+      } catch {
+        errorMessage = errorText || `HTTP ${response.status}: ${response.statusText}`;
+      }
+      throw new Error(`Ollama API error: ${errorMessage}`);
+    }
+
+    const contentType = response.headers.get('content-type');
+    if (contentType?.includes('application/json')) {
+      return response.json();
+    } else {
+      return response.text() as T;
+    }
+  }
+
+  /**
+   * Get list of available models
+   */
+  async listModels(): Promise<OllamaModel[]> {
+    const response = await retryWithBackoff(
+      () => this.request<OllamaModelsResponse>('/tags'),
+      {
+        maxAttempts: 3,
+        initialDelayMs: 1000,
+        shouldRetry: (error: unknown) => {
+          console.warn(`Error listing Ollama models: ${getErrorMessage(error)}`);
+          return true; // Retry on all errors
+        },
+      },
+    );
+    return response.models;
+  }
+
+  /**
+   * Generate text completion using Ollama
+   */
+  async generateCompletion(request: Omit<OllamaGenerateRequest, 'model'>): Promise<string> {
+    const fullRequest: OllamaGenerateRequest = {
+      ...request,
+      model: this.model,
+      stream: false,
+    };
+
+    const response = await retryWithBackoff(
+      () => this.request<OllamaGenerateResponse>('/generate', {
+        method: 'POST',
+        body: JSON.stringify(fullRequest),
+      }),
+      {
+        maxAttempts: 3,
+        initialDelayMs: 1000,
+        shouldRetry: (error: unknown) => {
+          console.warn(`Error generating completion: ${getErrorMessage(error)}`);
+          return true; // Retry on all errors
+        },
+      },
+    );
+
+    return response.response;
+  }
+
+  /**
+   * Generate streaming text completion using Ollama
+   */
+  async* generateCompletionStream(request: Omit<OllamaGenerateRequest, 'model'>): AsyncGenerator<string> {
+    const fullRequest: OllamaGenerateRequest = {
+      ...request,
+      model: this.model,
+      stream: true,
+    };
+
+    const url = `${this.baseUrl}/api/generate`;
+    const headers = this.createHeaders();
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(fullRequest),
+      signal: AbortSignal.timeout(this.timeout),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Ollama API error: ${errorText || response.statusText}`);
+    }
+
+    if (!response.body) {
+      throw new Error('No response body received from Ollama');
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n').filter(line => line.trim());
+
+        for (const line of lines) {
+          try {
+            const data: OllamaGenerateResponse = JSON.parse(line);
+            if (data.response) {
+              yield data.response;
+            }
+            if (data.done) {
+              return;
+            }
+          } catch (error) {
+            console.warn(`Failed to parse Ollama response line: ${line}`, error);
+          }
+        }
+      }
+    } finally {
+      reader.releaseLock();
+    }
+  }
+
+  /**
+   * Chat with model using chat API
+   */
+  async chat(messages: OllamaMessage[]): Promise<string> {
+    const request: OllamaChatRequest = {
+      model: this.model,
+      messages,
+      stream: false,
+    };
+
+    const response = await retryWithBackoff(
+      () => this.request<OllamaChatResponse>('/chat', {
+        method: 'POST',
+        body: JSON.stringify(request),
+      }),
+      {
+        maxAttempts: 3,
+        initialDelayMs: 1000,
+        shouldRetry: (error: unknown) => {
+          console.warn(`Error in chat: ${getErrorMessage(error)}`);
+          return true; // Retry on all errors
+        },
+      },
+    );
+
+    return response.message.content;
+  }
+
+  /**
+   * Chat with model using streaming chat API
+   */
+  async* chatStream(messages: OllamaMessage[]): AsyncGenerator<string> {
+    const request: OllamaChatRequest = {
+      model: this.model,
+      messages,
+      stream: true,
+    };
+
+    const url = `${this.baseUrl}/api/chat`;
+    const headers = this.createHeaders();
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(request),
+      signal: AbortSignal.timeout(this.timeout),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Ollama API error: ${errorText || response.statusText}`);
+    }
+
+    if (!response.body) {
+      throw new Error('No response body received from Ollama');
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n').filter(line => line.trim());
+
+        for (const line of lines) {
+          try {
+            const data: OllamaChatResponse = JSON.parse(line);
+            if (data.message?.content) {
+              yield data.message.content;
+            }
+            if (data.done) {
+              return;
+            }
+          } catch (error) {
+            console.warn(`Failed to parse Ollama chat response line: ${line}`, error);
+          }
+        }
+      }
+    } finally {
+      reader.releaseLock();
+    }
+  }
+
+  /**
+   * Check if a model is available
+   */
+  async isModelAvailable(modelName?: string): Promise<boolean> {
+    try {
+      const models = await this.listModels();
+      const targetModel = modelName || this.model;
+      return models.some(model => model.name === targetModel);
+    } catch (error) {
+      console.warn(`Failed to check model availability: ${getErrorMessage(error)}`);
+      return false;
+    }
+  }
+
+  /**
+   * Get model information
+   */
+  getModel(): string {
+    return this.model;
+  }
+
+  /**
+   * Set model for future requests
+   */
+  setModel(model: string): void {
+    this.model = model;
+  }
+}
+
+/**
+ * Create Ollama client from config
+ */
+export function createOllamaClient(config: Config): OllamaClient {
+  const baseUrl = process.env['OLLAMA_BASE_URL'] || config.getOllamaBaseUrl?.() || 'http://localhost:11434';
+  const model = config.getModel();
+  const apiKey = process.env['OLLAMA_API_KEY'] || config.getOllamaApiKey?.();
+
+  return new OllamaClient({
+    baseUrl,
+    model,
+    apiKey,
+    timeout: 120000, // 2 minutes for long-running generations
+  });
+}

@@ -10,7 +10,7 @@ import {
   CodeAssistServer,
   UserTierId,
   LoggingContentGenerator,
-} from '@google/gemini-cli-core';
+} from 'ollama-cli-core';
 
 export interface PrivacyState {
   isLoading: boolean;
