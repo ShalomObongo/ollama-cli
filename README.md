@@ -1,4 +1,6 @@
-# Gemini CLI
+# Ollama CLI
+
+A powerful command-line interface for interacting with Ollama models. Originally based on Google's Gemini CLI, this tool has been transformed to work seamlessly with Ollama's local and remote model deployment.
 
 [![Gemini CLI CI](https://github.com/google-gemini/gemini-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/google-gemini/gemini-cli/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/npm/v/@google/gemini-cli)](https://www.npmjs.com/package/@google/gemini-cli)
@@ -89,82 +91,70 @@ npm install -g @google/gemini-cli@nightly
 
 ### Advanced Capabilities
 
-- Ground your queries with built-in [Google Search](https://ai.google.dev/gemini-api/docs/grounding) for real-time information
 - Conversation checkpointing to save and resume complex sessions
-- Custom context files (GEMINI.md) to tailor behavior for your projects
+- Custom context files (OLLAMA.md) to tailor behavior for your projects
+- Support for multiple Ollama models with easy switching
+- Local and remote Ollama deployment support
 
 ### GitHub Integration
 
-Integrate Gemini CLI directly into your GitHub workflows with [**Gemini CLI GitHub Action**](https://github.com/google-github-actions/run-gemini-cli):
+Integrate Ollama CLI directly into your GitHub workflows:
 
 - **Pull Request Reviews**: Automated code review with contextual feedback and suggestions
-- **Issue Triage**: Automated labeling and prioritization of GitHub issues based on content analysis
-- **On-demand Assistance**: Mention `@gemini-cli` in issues and pull requests for help with debugging, explanations, or task delegation
+- **Issue Triage**: Automated labeling and prioritization of GitHub issues based on content analysis  
 - **Custom Workflows**: Build automated, scheduled and on-demand workflows tailored to your team's needs
 
 ## 🔐 Authentication Options
 
 Choose the authentication method that best fits your needs:
 
-### Option 1: OAuth login (Using your Google Account)
+### Option 1: Local Ollama (Recommended)
 
-**✨ Best for:** Individual developers as well as anyone who has a Gemini Code Assist License. (see [quota limits and terms of service](https://cloud.google.com/gemini/docs/quotas) for details)
-
-**Benefits:**
-
-- **Free tier**: 60 requests/min and 1,000 requests/day
-- **Gemini 2.5 Pro** with 1M token context window
-- **No API key management** - just sign in with your Google account
-- **Automatic updates** to latest models
-
-#### Start Gemini CLI, then choose OAuth and follow the browser authentication flow when prompted
-
-```bash
-gemini
-```
-
-#### If you are using a paid Code Assist License from your organization, remember to set the Google Cloud Project
-
-```bash
-# Set your Google Cloud Project
-export GOOGLE_CLOUD_PROJECT="YOUR_PROJECT_NAME"
-gemini
-```
-
-### Option 2: Gemini API Key
-
-**✨ Best for:** Developers who need specific model control or paid tier access
+**✨ Best for:** Developers who want full control over their AI models and data privacy.
 
 **Benefits:**
 
-- **Free tier**: 100 requests/day with Gemini 2.5 Pro
-- **Model selection**: Choose specific Gemini models
-- **Usage-based billing**: Upgrade for higher limits when needed
+- **Completely local**: Your code and conversations never leave your machine
+- **Multiple models**: Choose from llama3.2, codellama, and many other models
+- **No API keys required** - works with local Ollama installation
+- **Fast responses** with locally hosted models
+
+#### Start Ollama CLI with local authentication
 
 ```bash
-# Get your key from https://aistudio.google.com/apikey
+ollama-cli
+```
+
+### Option 2: Ollama with API Key
+
+**✨ Best for:** Teams using hosted Ollama deployments or Ollama cloud services.
+
+**Setup:**
+
+```bash
+# Set your Ollama API key
+export OLLAMA_API_KEY="your-api-key"
+export OLLAMA_BASE_URL="https://your-ollama-instance.com"  # Optional, defaults to localhost
+
+ollama-cli
+```
+
+### Option 3: Google/Gemini Compatibility (Legacy)
+
+For backwards compatibility, you can still use Gemini authentication methods:
+
+```bash
+# Gemini API Key
 export GEMINI_API_KEY="YOUR_API_KEY"
-gemini
-```
+ollama-cli
 
-### Option 3: Vertex AI
-
-**✨ Best for:** Enterprise teams and production workloads
-
-**Benefits:**
-
-- **Enterprise features**: Advanced security and compliance
-- **Scalable**: Higher rate limits with billing account
-- **Integration**: Works with existing Google Cloud infrastructure
-
-```bash
-# Get your key from Google Cloud Console
+# Or Google Cloud/Vertex AI
 export GOOGLE_API_KEY="YOUR_API_KEY"
 export GOOGLE_GENAI_USE_VERTEXAI=true
-gemini
+ollama-cli
 ```
 
-For Google Workspace accounts and other authentication methods, see the [authentication guide](./docs/cli/authentication.md).
+For more authentication options, see the [authentication guide](./docs/cli/authentication.md).
 
 ## 🚀 Getting Started
 
@@ -173,25 +163,25 @@ For Google Workspace accounts and other authentication methods, see the [authent
 #### Start in current directory
 
 ```bash
-gemini
+ollama-cli
 ```
 
 #### Include multiple directories
 
 ```bash
-gemini --include-directories ../lib,../docs
+ollama-cli --include-directories ../lib,../docs
 ```
 
 #### Use specific model
 
 ```bash
-gemini -m gemini-2.5-flash
+ollama-cli -m llama3.2:latest
 ```
 
 #### Non-interactive mode for scripts
 
 ```bash
-gemini -p "Explain the architecture of this codebase"
+ollama-cli -p "Explain the architecture of this codebase"
 ```
 
 ### Quick Examples
@@ -200,16 +190,16 @@ gemini -p "Explain the architecture of this codebase"
 
 ```bash
 cd new-project/
-gemini
+ollama-cli
 > Write me a Discord bot that answers questions using a FAQ.md file I will provide
 ```
 
 #### Analyze existing code
 
 ```bash
-git clone https://github.com/google-gemini/gemini-cli
-cd gemini-cli
-gemini
+git clone https://github.com/your-repo/project
+cd project
+ollama-cli
 > Give me a summary of all of the changes that went in yesterday
 ```
 
@@ -241,7 +231,7 @@ gemini
 
 ### Advanced Topics
 
-- [**Architecture Overview**](./docs/architecture.md) - How Gemini CLI works
+- [**Architecture Overview**](./docs/architecture.md) - How Ollama CLI works
 - [**IDE Integration**](./docs/ide-integration.md) - VS Code companion
 - [**Sandboxing & Security**](./docs/sandbox.md) - Safe execution environments
 - [**Enterprise Deployment**](./docs/deployment.md) - Docker, system-wide config
@@ -252,7 +242,7 @@ gemini
 
 - [**Settings Reference**](./docs/cli/configuration.md) - All configuration options
 - [**Theme Customization**](./docs/cli/themes.md) - Visual customization
-- [**.gemini Directory**](./docs/gemini-ignore.md) - Project-specific settings
+- [**.ollama Directory**](./docs/ollama-ignore.md) - Project-specific settings
 - [**Environment Variables**](./docs/cli/configuration.md#environment-variables)
 
 ### Troubleshooting & Support
@@ -263,7 +253,7 @@ gemini
 
 ### Using MCP Servers
 
-Configure MCP servers in `~/.gemini/settings.json` to extend Gemini CLI with custom tools:
+Configure MCP servers in `~/.ollama/settings.json` to extend Ollama CLI with custom tools:
 
 ```text
 > @github List my open pull requests
@@ -275,7 +265,7 @@ See the [MCP Server Integration guide](./docs/tools/mcp-server.md) for setup ins
 
 ## 🤝 Contributing
 
-We welcome contributions! Gemini CLI is fully open source (Apache 2.0), and we encourage the community to:
+We welcome contributions! Ollama CLI is fully open source (Apache 2.0), and we encourage the community to:
 
 - Report bugs and suggest features
 - Improve documentation
@@ -284,14 +274,11 @@ We welcome contributions! Gemini CLI is fully open source (Apache 2.0), and we e
 
 See our [Contributing Guide](./CONTRIBUTING.md) for development setup, coding standards, and how to submit pull requests.
 
-Check our [Official Roadmap](https://github.com/orgs/google-gemini/projects/11/) for planned features and priorities.
-
 ## 📖 Resources
 
-- **[Official Roadmap](./ROADMAP.md)** - See what's coming next
-- **[NPM Package](https://www.npmjs.com/package/@google/gemini-cli)** - Package registry
-- **[GitHub Issues](https://github.com/google-gemini/gemini-cli/issues)** - Report bugs or request features
-- **[Security Advisories](https://github.com/google-gemini/gemini-cli/security/advisories)** - Security updates
+- **[GitHub Repository](https://github.com/ShalomObongo/ollama-cli)** - Source code and issues
+- **[GitHub Issues](https://github.com/ShalomObongo/ollama-cli/issues)** - Report bugs or request features
+- **[Security Advisories](https://github.com/ShalomObongo/ollama-cli/security/advisories)** - Security updates
 
 ### Uninstall
 
@@ -306,5 +293,5 @@ See the [Uninstall Guide](docs/Uninstall.md) for removal instructions.
 ---
 
 <p align="center">
-  Built with ❤️ by Google and the open source community
+  Built with ❤️ for the Ollama community
 </p>
