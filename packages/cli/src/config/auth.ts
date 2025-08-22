@@ -28,6 +28,18 @@ export const validateAuthMethod = (authMethod: string): string | null => {
     return null;
   }
 
+  if (authMethod === AuthType.USE_OLLAMA) {
+    // No validation needed for local Ollama
+    return null;
+  }
+
+  if (authMethod === AuthType.USE_OLLAMA_API_KEY) {
+    if (!process.env['OLLAMA_API_KEY']) {
+      return 'OLLAMA_API_KEY environment variable not found. Add that to your environment and try again (no reload needed if using .env)!';
+    }
+    return null;
+  }
+
   if (authMethod === AuthType.USE_GEMINI) {
     if (!process.env['GEMINI_API_KEY']) {
       return 'GEMINI_API_KEY environment variable not found. Add that to your environment and try again (no reload needed if using .env)!';

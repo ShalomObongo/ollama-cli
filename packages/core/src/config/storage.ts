@@ -9,7 +9,8 @@ import * as os from 'os';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 
-export const GEMINI_DIR = '.gemini';
+export const OLLAMA_DIR = '.ollama';
+export const GEMINI_DIR = '.gemini'; // Keep for backwards compatibility
 export const GOOGLE_ACCOUNTS_FILENAME = 'google_accounts.json';
 const TMP_DIR_NAME = 'tmp';
 
@@ -18,6 +19,14 @@ export class Storage {
 
   constructor(targetDir: string) {
     this.targetDir = targetDir;
+  }
+
+  static getGlobalOllamaDir(): string {
+    const homeDir = os.homedir();
+    if (!homeDir) {
+      return path.join(os.tmpdir(), '.ollama');
+    }
+    return path.join(homeDir, OLLAMA_DIR);
   }
 
   static getGlobalGeminiDir(): string {
@@ -29,35 +38,115 @@ export class Storage {
   }
 
   static getMcpOAuthTokensPath(): string {
-    return path.join(Storage.getGlobalGeminiDir(), 'mcp-oauth-tokens.json');
+    // Try .ollama first, fall back to .gemini for backwards compatibility
+    const ollamaPath = path.join(Storage.getGlobalOllamaDir(), 'mcp-oauth-tokens.json');
+    const geminiPath = path.join(Storage.getGlobalGeminiDir(), 'mcp-oauth-tokens.json');
+    
+    if (fs.existsSync(ollamaPath)) {
+      return ollamaPath;
+    } else if (fs.existsSync(geminiPath)) {
+      return geminiPath;
+    }
+    return ollamaPath; // Default to .ollama for new installations
   }
 
   static getGlobalSettingsPath(): string {
-    return path.join(Storage.getGlobalGeminiDir(), 'settings.json');
+    // Try .ollama first, fall back to .gemini for backwards compatibility
+    const ollamaPath = path.join(Storage.getGlobalOllamaDir(), 'settings.json');
+    const geminiPath = path.join(Storage.getGlobalGeminiDir(), 'settings.json');
+    
+    if (fs.existsSync(ollamaPath)) {
+      return ollamaPath;
+    } else if (fs.existsSync(geminiPath)) {
+      return geminiPath;
+    }
+    return ollamaPath; // Default to .ollama for new installations
   }
 
   static getInstallationIdPath(): string {
-    return path.join(Storage.getGlobalGeminiDir(), 'installation_id');
+    // Try .ollama first, fall back to .gemini for backwards compatibility
+    const ollamaPath = path.join(Storage.getGlobalOllamaDir(), 'installation_id');
+    const geminiPath = path.join(Storage.getGlobalGeminiDir(), 'installation_id');
+    
+    if (fs.existsSync(ollamaPath)) {
+      return ollamaPath;
+    } else if (fs.existsSync(geminiPath)) {
+      return geminiPath;
+    }
+    return ollamaPath; // Default to .ollama for new installations
   }
 
   static getGoogleAccountsPath(): string {
-    return path.join(Storage.getGlobalGeminiDir(), GOOGLE_ACCOUNTS_FILENAME);
+    // Try .ollama first, fall back to .gemini for backwards compatibility
+    const ollamaPath = path.join(Storage.getGlobalOllamaDir(), GOOGLE_ACCOUNTS_FILENAME);
+    const geminiPath = path.join(Storage.getGlobalGeminiDir(), GOOGLE_ACCOUNTS_FILENAME);
+    
+    if (fs.existsSync(ollamaPath)) {
+      return ollamaPath;
+    } else if (fs.existsSync(geminiPath)) {
+      return geminiPath;
+    }
+    return ollamaPath; // Default to .ollama for new installations
   }
 
   static getUserCommandsDir(): string {
-    return path.join(Storage.getGlobalGeminiDir(), 'commands');
+    // Try .ollama first, fall back to .gemini for backwards compatibility
+    const ollamaPath = path.join(Storage.getGlobalOllamaDir(), 'commands');
+    const geminiPath = path.join(Storage.getGlobalGeminiDir(), 'commands');
+    
+    if (fs.existsSync(ollamaPath)) {
+      return ollamaPath;
+    } else if (fs.existsSync(geminiPath)) {
+      return geminiPath;
+    }
+    return ollamaPath; // Default to .ollama for new installations
   }
 
   static getGlobalMemoryFilePath(): string {
-    return path.join(Storage.getGlobalGeminiDir(), 'memory.md');
+    // Try .ollama first, fall back to .gemini for backwards compatibility
+    const ollamaPath = path.join(Storage.getGlobalOllamaDir(), 'memory.md');
+    const geminiPath = path.join(Storage.getGlobalGeminiDir(), 'memory.md');
+    
+    if (fs.existsSync(ollamaPath)) {
+      return ollamaPath;
+    } else if (fs.existsSync(geminiPath)) {
+      return geminiPath;
+    }
+    return ollamaPath; // Default to .ollama for new installations
   }
 
   static getGlobalTempDir(): string {
-    return path.join(Storage.getGlobalGeminiDir(), TMP_DIR_NAME);
+    // Try .ollama first, fall back to .gemini for backwards compatibility
+    const ollamaPath = path.join(Storage.getGlobalOllamaDir(), TMP_DIR_NAME);
+    const geminiPath = path.join(Storage.getGlobalGeminiDir(), TMP_DIR_NAME);
+    
+    if (fs.existsSync(ollamaPath)) {
+      return ollamaPath;
+    } else if (fs.existsSync(geminiPath)) {
+      return geminiPath;
+    }
+    return ollamaPath; // Default to .ollama for new installations
+  }
+
+  getOllamaDir(): string {
+    return path.join(this.targetDir, OLLAMA_DIR);
   }
 
   getGeminiDir(): string {
     return path.join(this.targetDir, GEMINI_DIR);
+  }
+
+  // Check for .ollama directory first, fall back to .gemini
+  getConfigDir(): string {
+    const ollamaDir = this.getOllamaDir();
+    const geminiDir = this.getGeminiDir();
+    
+    if (fs.existsSync(ollamaDir)) {
+      return ollamaDir;
+    } else if (fs.existsSync(geminiDir)) {
+      return geminiDir;
+    }
+    return ollamaDir; // Default to .ollama for new installations
   }
 
   getProjectTempDir(): string {
@@ -71,7 +160,16 @@ export class Storage {
   }
 
   static getOAuthCredsPath(): string {
-    return path.join(Storage.getGlobalGeminiDir(), 'oauth_creds.json');
+    // Try .ollama first, fall back to .gemini for backwards compatibility
+    const ollamaPath = path.join(Storage.getGlobalOllamaDir(), 'oauth_creds.json');
+    const geminiPath = path.join(Storage.getGlobalGeminiDir(), 'oauth_creds.json');
+    
+    if (fs.existsSync(ollamaPath)) {
+      return ollamaPath;
+    } else if (fs.existsSync(geminiPath)) {
+      return geminiPath;
+    }
+    return ollamaPath; // Default to .ollama for new installations
   }
 
   getProjectRoot(): string {
@@ -84,16 +182,16 @@ export class Storage {
 
   getHistoryDir(): string {
     const hash = this.getFilePathHash(this.getProjectRoot());
-    const historyDir = path.join(Storage.getGlobalGeminiDir(), 'history');
+    const historyDir = path.join(Storage.getGlobalOllamaDir(), 'history');
     return path.join(historyDir, hash);
   }
 
   getWorkspaceSettingsPath(): string {
-    return path.join(this.getGeminiDir(), 'settings.json');
+    return path.join(this.getConfigDir(), 'settings.json');
   }
 
   getProjectCommandsDir(): string {
-    return path.join(this.getGeminiDir(), 'commands');
+    return path.join(this.getConfigDir(), 'commands');
   }
 
   getProjectTempCheckpointsDir(): string {
@@ -101,11 +199,11 @@ export class Storage {
   }
 
   getExtensionsDir(): string {
-    return path.join(this.getGeminiDir(), 'extensions');
+    return path.join(this.getConfigDir(), 'extensions');
   }
 
   getExtensionsConfigPath(): string {
-    return path.join(this.getExtensionsDir(), 'gemini-extension.json');
+    return path.join(this.getExtensionsDir(), 'ollama-extension.json');
   }
 
   getHistoryFilePath(): string {
