@@ -9,8 +9,7 @@ const { logSlashCommand } = vi.hoisted(() => ({
 }));
 
 vi.mock('ollama-cli-core', async (importOriginal) => {
-  const original =
-    await importOriginal<typeof import('ollama-cli-core')>();
+  const original = await importOriginal<typeof import('ollama-cli-core')>();
 
   return {
     ...original,
@@ -82,10 +81,7 @@ import { MessageType } from '../types.js';
 import { BuiltinCommandLoader } from '../../services/BuiltinCommandLoader.js';
 import { FileCommandLoader } from '../../services/FileCommandLoader.js';
 import { McpPromptLoader } from '../../services/McpPromptLoader.js';
-import {
-  SlashCommandStatus,
-  makeFakeConfig,
-} from 'ollama-cli-core/index.js';
+import { SlashCommandStatus, makeFakeConfig } from 'ollama-cli-core/index.js';
 
 function createTestCommand(
   overrides: Partial<SlashCommand>,

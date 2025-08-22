@@ -13,7 +13,7 @@ function getAuthTypeFromEnv(): AuthType | undefined {
   if (process.env['OLLAMA_API_KEY']) {
     return AuthType.USE_OLLAMA_API_KEY;
   }
-  
+
   // Check for legacy Gemini authentication methods
   if (process.env['GOOGLE_GENAI_USE_GCA'] === 'true') {
     return AuthType.LOGIN_WITH_GOOGLE;
@@ -24,7 +24,7 @@ function getAuthTypeFromEnv(): AuthType | undefined {
   if (process.env['GEMINI_API_KEY']) {
     return AuthType.USE_GEMINI;
   }
-  
+
   // Default to local Ollama if no explicit authentication is provided
   return AuthType.USE_OLLAMA;
 }

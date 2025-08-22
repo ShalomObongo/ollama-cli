@@ -49,8 +49,7 @@ vi.mock('./prompt-processors/argumentProcessor.js', async (importOriginal) => {
   };
 });
 vi.mock('ollama-cli-core', async (importOriginal) => {
-  const original =
-    await importOriginal<typeof import('ollama-cli-core')>();
+  const original = await importOriginal<typeof import('ollama-cli-core')>();
   return {
     ...original,
     Storage: original.Storage,

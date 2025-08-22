@@ -4,10 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  getErrorMessage,
-  loadServerHierarchicalMemory,
-} from 'ollama-cli-core';
+import { getErrorMessage, loadServerHierarchicalMemory } from 'ollama-cli-core';
 import { MessageType } from '../types.js';
 import {
   CommandKind,

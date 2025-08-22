@@ -19,8 +19,7 @@ import { MessageActionReturn } from './types.js';
 import { Type, CallableTool } from '@google/genai';
 
 vi.mock('ollama-cli-core', async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import('ollama-cli-core')>();
+  const actual = await importOriginal<typeof import('ollama-cli-core')>();
   return {
     ...actual,
     getMCPServerStatus: vi.fn(),

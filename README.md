@@ -101,7 +101,7 @@ npm install -g @google/gemini-cli@nightly
 Integrate Ollama CLI directly into your GitHub workflows:
 
 - **Pull Request Reviews**: Automated code review with contextual feedback and suggestions
-- **Issue Triage**: Automated labeling and prioritization of GitHub issues based on content analysis  
+- **Issue Triage**: Automated labeling and prioritization of GitHub issues based on content analysis
 - **Custom Workflows**: Build automated, scheduled and on-demand workflows tailored to your team's needs
 
 ## 🔐 Authentication Options

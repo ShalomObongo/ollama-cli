@@ -15,8 +15,7 @@ vi.mock('../hooks/useTerminalSize.js');
 const useTerminalSizeMock = vi.mocked(useTerminalSize.useTerminalSize);
 
 vi.mock('ollama-cli-core', async (importOriginal) => {
-  const original =
-    await importOriginal<typeof import('ollama-cli-core')>();
+  const original = await importOriginal<typeof import('ollama-cli-core')>();
   return {
     ...original,
     shortenPath: (p: string, len: number) => {

@@ -19,21 +19,21 @@ Before you begin, ensure you have the following installed on your system:
 
 ### Required Software
 
-1. **Node.js** 
+1. **Node.js**
    - **Development**: Node.js `~20.19.0` (specific version required due to upstream dependency issues)
    - **Production**: Any version `>=20.0.0` works for running the built CLI
    - **Recommendation**: Use [nvm (Node Version Manager)](https://github.com/nvm-sh/nvm) to manage Node versions
 
-2. **Git** 
+2. **Git**
    - Any recent version for cloning and version control
 
-3. **npm** 
+3. **npm**
    - Comes bundled with Node.js
    - Version 9+ recommended for workspace support
 
 ### Optional (Recommended)
 
-4. **Ollama** 
+4. **Ollama**
    - Install [Ollama](https://ollama.ai/download) for local AI model support
    - Required for the default authentication method (`USE_OLLAMA`)
 
@@ -77,6 +77,7 @@ npm start
 #### Using Node Version Manager (Recommended)
 
 **On macOS/Linux:**
+
 ```bash
 # Install nvm
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
@@ -91,6 +92,7 @@ nvm alias default 20.19.0
 ```
 
 **On Windows:**
+
 ```bash
 # Install nvm-windows from: https://github.com/coreybutler/nvm-windows
 # Then run:
@@ -405,6 +407,7 @@ npm start
 #### Issue: "Cannot find module" errors
 
 **Solution:**
+
 ```bash
 # Clean and reinstall dependencies
 npm run clean
@@ -415,6 +418,7 @@ npm run build
 #### Issue: Node.js version conflicts
 
 **Solution:**
+
 ```bash
 # Check current version
 node --version
@@ -430,6 +434,7 @@ nvm use 20.19.0
 #### Issue: Build failures
 
 **Solution:**
+
 ```bash
 # Clean build cache
 npm run clean
@@ -445,6 +450,7 @@ npm run build
 #### Issue: CLI won't start - "Ollama not found"
 
 **Solution:**
+
 ```bash
 # Install Ollama
 # macOS: brew install ollama
@@ -464,6 +470,7 @@ npm start
 #### Issue: Permission denied on Linux/macOS
 
 **Solution:**
+
 ```bash
 # Fix npm permissions
 sudo chown -R $(whoami) ~/.npm
@@ -475,6 +482,7 @@ sudo chown -R $(whoami) /usr/local/lib/node_modules
 #### Issue: Tests failing with authentication errors
 
 **Solution:**
+
 ```bash
 # Set test API key
 export GEMINI_API_KEY="your-test-api-key"
@@ -489,6 +497,7 @@ npm run test
 #### Issue: Bundle not found
 
 **Solution:**
+
 ```bash
 # Create bundle
 npm run bundle

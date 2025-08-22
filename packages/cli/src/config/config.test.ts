@@ -69,9 +69,8 @@ vi.mock('read-package-up', () => ({
 }));
 
 vi.mock('ollama-cli-core', async () => {
-  const actualServer = await vi.importActual<typeof ServerConfig>(
-    'ollama-cli-core',
-  );
+  const actualServer =
+    await vi.importActual<typeof ServerConfig>('ollama-cli-core');
   return {
     ...actualServer,
     IdeClient: {

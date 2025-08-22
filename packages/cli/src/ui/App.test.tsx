@@ -92,8 +92,7 @@ interface MockServerConfig {
 
 // Mock ollama-cli-core and its Config class
 vi.mock('ollama-cli-core', async (importOriginal) => {
-  const actualCore =
-    await importOriginal<typeof import('ollama-cli-core')>();
+  const actualCore = await importOriginal<typeof import('ollama-cli-core')>();
   const ConfigClassMock = vi
     .fn()
     .mockImplementation((optionsPassedToConstructor) => {

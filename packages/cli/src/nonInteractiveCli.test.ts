@@ -20,8 +20,7 @@ import { vi } from 'vitest';
 // Mock core modules
 vi.mock('./ui/hooks/atCommandProcessor.js');
 vi.mock('ollama-cli-core', async (importOriginal) => {
-  const original =
-    await importOriginal<typeof import('ollama-cli-core')>();
+  const original = await importOriginal<typeof import('ollama-cli-core')>();
   return {
     ...original,
     executeToolCall: vi.fn(),
