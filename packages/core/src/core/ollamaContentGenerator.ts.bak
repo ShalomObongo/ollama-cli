@@ -5,130 +5,35 @@
  */
 
 import {
+  GenerateContentParameters,
+  GenerateContentResponse,
+  CountTokensParameters,
+  CountTokensResponse,
+  EmbedContentParameters,
+  EmbedContentResponse,
+  Content,
+  Part,
+  Tool,
+  FunctionDeclaration,
+  Candidate,
+} from '@google/genai';
+
+import {
   OllamaClient,
   OllamaMessage,
   createOllamaClient,
 } from './ollamaClient.js';
 import { Config } from '../config/config.js';
 import { getErrorMessage } from '../utils/errors.js';
-
-/**
- * Simulated types to maintain compatibility with Gemini interfaces
- */
-export interface GenerateContentParameters {
-  contents: Content[];
-  tools?: Tool[];
-  systemInstruction?: Content;
-  generationConfig?: {
-    temperature?: number;
-    topK?: number;
-    topP?: number;
-    maxOutputTokens?: number;
-    stopSequences?: string[];
-  };
-}
-
-export interface Content {
-  parts: Part[];
-  role?: 'user' | 'model' | 'system';
-}
-
-export interface Part {
-  text?: string;
-  functionCall?: {
-    name: string;
-    args: Record<string, unknown>;
-  };
-  functionResponse?: {
-    name: string;
-    response: Record<string, unknown>;
-  };
-  inlineData?: {
-    mimeType: string;
-    data: string;
-  };
-  fileData?: {
-    mimeType: string;
-    fileUri: string;
-  };
-}
-
-export interface Tool {
-  functionDeclarations: FunctionDeclaration[];
-}
-
-export interface FunctionDeclaration {
-  name: string;
-  description: string;
-  parameters?: {
-    type: string;
-    properties: Record<string, unknown>;
-    required?: string[];
-  };
-}
-
-export interface GenerateContentResponse {
-  candidates?: Candidate[];
-  promptFeedback?: {
-    blockReason?: string;
-    safetyRatings?: Array<{
-      category: string;
-      probability: string;
-    }>;
-  };
-  usageMetadata?: {
-    promptTokenCount?: number;
-    candidatesTokenCount?: number;
-    totalTokenCount?: number;
-  };
-}
-
-export interface Candidate {
-  content: Content;
-  finishReason?: string;
-  safetyRatings?: Array<{
-    category: string;
-    probability: string;
-  }>;
-  citationMetadata?: {
-    citationSources?: Array<{
-      startIndex?: number;
-      endIndex?: number;
-      uri?: string;
-      license?: string;
-    }>;
-  };
-}
-
-export interface CountTokensParameters {
-  contents: Content[];
-}
-
-export interface CountTokensResponse {
-  totalTokens: number;
-}
-
-export interface EmbedContentParameters {
-  content: Content;
-  taskType?: string;
-  title?: string;
-}
-
-export interface EmbedContentResponse {
-  embedding: {
-    values: number[];
-  };
-}
+import { ContentGenerator } from './contentGenerator.js';
 
 /**
  * Ollama-based content generator that implements the same interface as Gemini
  */
-export class OllamaContentGenerator {
+export class OllamaContentGenerator implements ContentGenerator {
   private client: OllamaClient;
-  private config: Config;
 
   constructor(config: Config) {
-    this.config = config;
     this.client = createOllamaClient(config);
   }
 
@@ -227,7 +132,9 @@ export class OllamaContentGenerator {
     userPromptId: string,
   ): Promise<GenerateContentResponse> {
     try {
-      let messages = this.convertToOllamaMessages(request.contents);
+      // Convert contents to array format
+      const contents = Array.isArray(request.contents) ? request.contents : [request.contents];
+      let messages = this.convertToOllamaMessages(contents);
       messages = this.addSystemInstruction(messages, request.systemInstruction);
 
       // Add tool descriptions to the last user message
@@ -261,12 +168,21 @@ export class OllamaContentGenerator {
   /**
    * Generate streaming content using Ollama
    */
-  async* generateContentStream(
+  async generateContentStream(
+    request: GenerateContentParameters,
+    userPromptId: string,
+  ): Promise<AsyncGenerator<GenerateContentResponse>> {
+    return this.generateContentStreamInternal(request, userPromptId);
+  }
+
+  private async* generateContentStreamInternal(
     request: GenerateContentParameters,
     userPromptId: string,
   ): AsyncGenerator<GenerateContentResponse> {
     try {
-      let messages = this.convertToOllamaMessages(request.contents);
+      // Convert contents to array format
+      const contents = Array.isArray(request.contents) ? request.contents : [request.contents];
+      let messages = this.convertToOllamaMessages(contents);
       messages = this.addSystemInstruction(messages, request.systemInstruction);
 
       // Add tool descriptions to the last user message
@@ -309,7 +225,8 @@ export class OllamaContentGenerator {
   async countTokens(request: CountTokensParameters): Promise<CountTokensResponse> {
     // Since Ollama doesn't have a direct token counting API, 
     // we'll estimate based on text length
-    const totalText = request.contents
+    const contents = Array.isArray(request.contents) ? request.contents : [request.contents];
+    const totalText = contents
       .flatMap(content => content.parts)
       .filter(part => part.text)
       .map(part => part.text!)

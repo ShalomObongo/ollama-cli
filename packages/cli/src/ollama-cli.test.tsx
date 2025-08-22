@@ -10,7 +10,7 @@ import {
   main,
   setupUnhandledRejectionHandler,
   validateDnsResolutionOrder,
-} from './gemini.js';
+} from './ollama-cli.js';
 import {
   LoadedSettings,
   SettingsFile,

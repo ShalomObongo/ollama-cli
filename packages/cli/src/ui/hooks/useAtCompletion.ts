@@ -10,7 +10,7 @@ import {
   FileSearch,
   FileSearchFactory,
   escapePath,
-} from '@google/gemini-cli-core';
+} from 'ollama-cli-core';
 import {
   Suggestion,
   MAX_SUGGESTIONS_TO_SHOW,

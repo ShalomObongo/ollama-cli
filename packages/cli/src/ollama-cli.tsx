@@ -193,6 +193,13 @@ export async function main() {
         'selectedAuthType',
         AuthType.CLOUD_SHELL,
       );
+    } else {
+      // Default to Ollama authentication
+      settings.setValue(
+        SettingScope.User,
+        'selectedAuthType',
+        AuthType.USE_OLLAMA,
+      );
     }
   }
 

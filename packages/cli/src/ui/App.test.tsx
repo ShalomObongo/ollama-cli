@@ -17,7 +17,7 @@ import {
   GeminiClient,
   ideContext,
   type AuthType,
-} from '@google/gemini-cli-core';
+} from 'ollama-cli-core';
 import { LoadedSettings, SettingsFile, Settings } from '../config/settings.js';
 import process from 'node:process';
 import { useGeminiStream } from './hooks/useGeminiStream.js';
@@ -90,10 +90,10 @@ interface MockServerConfig {
   getScreenReader: Mock<() => boolean>;
 }
 
-// Mock @google/gemini-cli-core and its Config class
-vi.mock('@google/gemini-cli-core', async (importOriginal) => {
+// Mock ollama-cli-core and its Config class
+vi.mock('ollama-cli-core', async (importOriginal) => {
   const actualCore =
-    await importOriginal<typeof import('@google/gemini-cli-core')>();
+    await importOriginal<typeof import('ollama-cli-core')>();
   const ConfigClassMock = vi
     .fn()
     .mockImplementation((optionsPassedToConstructor) => {
@@ -265,7 +265,7 @@ vi.mock('../hooks/useTerminalSize.js', () => ({
 
 const mockedCheckForUpdates = vi.mocked(checkForUpdates);
 const { isGitRepository: mockedIsGitRepository } = vi.mocked(
-  await import('@google/gemini-cli-core'),
+  await import('ollama-cli-core'),
 );
 
 vi.mock('node:child_process');

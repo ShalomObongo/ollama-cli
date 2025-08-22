@@ -170,11 +170,13 @@ export class OllamaClient {
   async listModels(): Promise<OllamaModel[]> {
     const response = await retryWithBackoff(
       () => this.request<OllamaModelsResponse>('/tags'),
-      3,
-      1000,
-      (error) => {
-        console.warn(`Error listing Ollama models: ${getErrorMessage(error)}`);
-        return true; // Retry on all errors
+      {
+        maxAttempts: 3,
+        initialDelayMs: 1000,
+        shouldRetry: (error: unknown) => {
+          console.warn(`Error listing Ollama models: ${getErrorMessage(error)}`);
+          return true; // Retry on all errors
+        },
       },
     );
     return response.models;
@@ -195,11 +197,13 @@ export class OllamaClient {
         method: 'POST',
         body: JSON.stringify(fullRequest),
       }),
-      3,
-      1000,
-      (error) => {
-        console.warn(`Error generating completion: ${getErrorMessage(error)}`);
-        return true; // Retry on all errors
+      {
+        maxAttempts: 3,
+        initialDelayMs: 1000,
+        shouldRetry: (error: unknown) => {
+          console.warn(`Error generating completion: ${getErrorMessage(error)}`);
+          return true; // Retry on all errors
+        },
       },
     );
 
@@ -280,11 +284,13 @@ export class OllamaClient {
         method: 'POST',
         body: JSON.stringify(request),
       }),
-      3,
-      1000,
-      (error) => {
-        console.warn(`Error in chat: ${getErrorMessage(error)}`);
-        return true; // Retry on all errors
+      {
+        maxAttempts: 3,
+        initialDelayMs: 1000,
+        shouldRetry: (error: unknown) => {
+          console.warn(`Error in chat: ${getErrorMessage(error)}`);
+          return true; // Retry on all errors
+        },
       },
     );
 

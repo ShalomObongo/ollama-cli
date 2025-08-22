@@ -135,11 +135,22 @@ export async function createContentGenerator(
     config.authType === AuthType.USE_OLLAMA ||
     config.authType === AuthType.USE_OLLAMA_API_KEY
   ) {
-    const { createOllamaContentGenerator } = await import('./ollamaContentGenerator.js');
-    return new LoggingContentGenerator(
-      createOllamaContentGenerator(gcConfig),
-      gcConfig,
-    );
+    // For now, return a mock content generator that throws helpful errors
+    const mockGenerator: ContentGenerator = {
+      async generateContent(request: GenerateContentParameters, userPromptId: string) {
+        throw new Error('Ollama integration is not fully implemented yet. Please use Gemini authentication for now.');
+      },
+      async generateContentStream(request: GenerateContentParameters, userPromptId: string) {
+        throw new Error('Ollama integration is not fully implemented yet. Please use Gemini authentication for now.');
+      },
+      async countTokens(request: CountTokensParameters) {
+        throw new Error('Ollama integration is not fully implemented yet. Please use Gemini authentication for now.');
+      },
+      async embedContent(request: EmbedContentParameters) {
+        throw new Error('Ollama integration is not fully implemented yet. Please use Gemini authentication for now.');
+      },
+    };
+    return new LoggingContentGenerator(mockGenerator, gcConfig);
   }
 
   if (

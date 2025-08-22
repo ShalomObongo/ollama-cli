@@ -19,8 +19,9 @@ export * from './core/turn.js';
 export * from './core/geminiRequest.js';
 export * from './core/coreToolScheduler.js';
 export * from './core/nonInteractiveToolExecutor.js';
-export * from './core/ollamaClient.js';
-export * from './core/ollamaContentGenerator.js';
+// TODO: Re-enable Ollama exports after fixing type compatibility
+// export * from './core/ollamaClient.js';
+// export * from './core/ollamaContentGenerator.js';
 
 export * from './code_assist/codeAssist.js';
 export * from './code_assist/oauth2.js';

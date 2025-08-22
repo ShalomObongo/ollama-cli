@@ -20,14 +20,14 @@ import {
   Config,
   Config as ActualConfigType,
   ApprovalMode,
-} from '@google/gemini-cli-core';
+} from 'ollama-cli-core';
 import { useKeypress, Key } from './useKeypress.js';
 
 vi.mock('./useKeypress.js');
 
-vi.mock('@google/gemini-cli-core', async () => {
+vi.mock('ollama-cli-core', async () => {
   const actualServerModule = (await vi.importActual(
-    '@google/gemini-cli-core',
+    'ollama-cli-core',
   )) as Record<string, unknown>;
   return {
     ...actualServerModule,
